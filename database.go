@@ -22,6 +22,7 @@ func (d Database) Connect() (*gorm.DB, error) {
 	return db, err
 }
 
+// 接続文字列を生成する。
 func createDBConnectString(c Config) string {
 	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", c.User, c.Password, c.Host, c.Port, "mysql")
 }

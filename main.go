@@ -43,7 +43,7 @@ func main() {
 	}
 
 	// 出力先の設定
-	var output Output = NewCsv(os.Stdout, config)
+	var output Output = NewCSV(os.Stdout, config)
 	_, err = output.WriteDDL(columns, tableRows)
 	if err != nil {
 		printError(err)

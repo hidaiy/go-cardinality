@@ -12,9 +12,16 @@ func NewInformationSchema(db *gorm.DB) *InformationSchema {
 	}
 }
 
+type TableRows map[string]int
+
+func (t TableRows) GetRows(tableName string) (int, bool) {
+	rows, ok := t[tableName]
+	return rows, ok
+}
+
 // テーブルごとのレコード件数を返す。
 // テーブル名をキー、値をレコード件数のmapの形で返す。
-func (inf *InformationSchema) TableRows(databaseName string) (map[string]int, error) {
+func (inf *InformationSchema) TableRows(databaseName string) (TableRows, error) {
 	tables, err := inf.Tables(databaseName)
 	if err != nil {
 		return nil, err

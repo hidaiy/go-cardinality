@@ -28,7 +28,7 @@ type CSV struct {
 	config Config
 }
 
-func NewCsv(out io.Writer, config Config) *CSV {
+func NewCSV(out io.Writer, config Config) *CSV {
 	return &CSV{
 		out:    out,
 		config: config,
@@ -45,13 +45,13 @@ func (r *CSV) CsvString(row *Row) string {
 	return fmt.Sprintf("%s\n", strings.Join(row.StringArray(), ", "))
 }
 
-func (r *CSV) WriteDDL(columns []Column, tableRows map[string]int) (int, error) {
+func (r *CSV) WriteDDL(columns []Column, tableRows TableRows) (int, error) {
 	var row *Row
 	r.WriteStringArray(CSV_HEADER)
 	for _, column := range columns {
 
 		// テーブルのレコード件数
-		rows, ok := tableRows[column.TableName]
+		rows, ok := tableRows.GetRows(column.TableName)
 		if !ok {
 			return 0, errors.New(fmt.Sprintln("table count not found:", column.TableName))
 		}
