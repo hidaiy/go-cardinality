@@ -18,30 +18,25 @@ var CSV_HEADER = []string{
 	"drop_index_ddl",
 }
 
-type Creator interface {
-	Write(*Row) (int, error)
-	WriteStringArray([]string) (int, error)
-}
-
 type CSV struct {
-	out    io.Writer
-	config Config
+	out       io.Writer
+	threshold int
 }
 
-func NewCSV(out io.Writer, config Config) *CSV {
+func NewCSV(out io.Writer, threshold int) *CSV {
 	return &CSV{
-		out:    out,
-		config: config,
+		out:       out,
+		threshold: threshold,
 	}
 }
 
-func (c CSV) Write(row *Row) (int, error) {
-	return c.out.Write([]byte(c.CsvString(row)))
+func (c CSV) WriteRow(row *Row) (int, error) {
+	return c.out.Write([]byte(c.csvString(row)))
 }
 func (c CSV) WriteStringArray(array []string) (int, error) {
 	return c.out.Write([]byte(strings.Join(array, ", ")))
 }
-func (r *CSV) CsvString(row *Row) string {
+func (r *CSV) csvString(row *Row) string {
 	return fmt.Sprintf("%s\n", strings.Join(row.StringArray(), ", "))
 }
 
@@ -57,7 +52,7 @@ func (r *CSV) WriteDDL(columns []Column, tableRows TableRows) (int, error) {
 		}
 
 		// インデックスジェネレーターの作成
-		indexGenerator, err := NewIndexGenerator(column, rows, r.config.Threshold)
+		indexGenerator, err := NewIndexGenerator(column, rows, r.threshold)
 		if err != nil {
 			return 0, err
 		}
@@ -75,7 +70,7 @@ func (r *CSV) WriteDDL(columns []Column, tableRows TableRows) (int, error) {
 		}
 
 		// 出力
-		r.Write(row)
+		r.WriteRow(row)
 	}
 	return 0, nil
 }

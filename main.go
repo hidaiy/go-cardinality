@@ -18,7 +18,7 @@ func main() {
 	}
 
 	// DB接続
-	db, err := NewDatabase(config).Connect()
+	db, err := Connect(config)
 	if err != nil {
 		printError(err)
 		return
@@ -43,7 +43,7 @@ func main() {
 	}
 
 	// 出力先の設定
-	var output Output = NewCSV(os.Stdout, config)
+	output := NewCSV(os.Stdout, config.Threshold)
 	_, err = output.WriteDDL(columns, tableRows)
 	if err != nil {
 		printError(err)

@@ -6,20 +6,11 @@ import (
 )
 
 type Database struct {
-	config Config
+	DB *gorm.DB
 }
 
-func NewDatabase(config Config) *Database {
-	return &Database{config: config}
-}
-
-func (d Database) Connect() (*gorm.DB, error) {
-	db, err := gorm.Open(d.config.Dialect, createDBConnectString(d.config))
-	if err != nil {
-		printError(err)
-		return db, err
-	}
-	return db, err
+func Connect(config Config) (*gorm.DB, error) {
+	return gorm.Open(config.Dialect, createDBConnectString(config))
 }
 
 // 接続文字列を生成する。

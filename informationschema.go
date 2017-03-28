@@ -12,6 +12,7 @@ func NewInformationSchema(db *gorm.DB) *InformationSchema {
 	}
 }
 
+// TableRows has rows of each tables.
 type TableRows map[string]int
 
 func (t TableRows) GetRows(tableName string) (int, bool) {
@@ -37,14 +38,14 @@ func (inf *InformationSchema) TableRows(databaseName string) (TableRows, error) 
 func (inf *InformationSchema) TableColumns(databaseName string) ([]Column, error) {
 	var columns []Column
 	result := inf.DB.Raw(`
-	         select c.table_schema as database_name,
-	                c.table_name,
-	                c.column_name
-	         from information_schema.columns c
-	         join information_schema.tables t
-	           on c.table_name = t.table_name
-	          and t.table_type = 'BASE TABLE'
-	         where c.table_schema = ?`, databaseName).Scan(&columns)
+		select c.table_schema as database_name,
+		       c.table_name,
+		       c.column_name
+		  from information_schema.columns c
+		  join information_schema.tables t
+		    on c.table_name = t.table_name
+		   and t.table_type = 'BASE TABLE'
+		 where c.table_schema = ?`, databaseName).Scan(&columns)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -62,12 +63,12 @@ func (inf *InformationSchema) TableColumns(databaseName string) ([]Column, error
 func (i *InformationSchema) Tables(databaseName string) ([]Table, error) {
 	var ret []Table
 	result := i.DB.Raw(`
-                 select table_name as name,
-                        table_rows as rows
-                   from information_schema.tables
-                  where table_schema = ?
-                    and table_rows is not null
-                    and table_type = 'BASE TABLE'
-                    `, databaseName).Scan(&ret)
+		select table_name as name,
+			table_rows as rows
+		  from information_schema.tables
+		 where table_schema = ?
+		   and table_rows is not null
+		   and table_type = 'BASE TABLE'
+		   `, databaseName).Scan(&ret)
 	return ret, result.Error
 }
