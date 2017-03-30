@@ -10,6 +10,7 @@ type Column struct {
 	DatabaseName string
 	TableName    string
 	ColumnName   string
+	distinctRows int
 }
 
 // テーブル単位の件数の取得
@@ -42,9 +43,15 @@ func (c *Column) ExistingIndexNames() ([]string, error) {
 
 // 重複を省いた件数を返す。
 func (c *Column) DistinctRows() (ret int, err error) {
+	if c.distinctRows != 0 {
+		//fmt.Println("distinct rows returned from property")
+		return c.distinctRows, nil
+	}
 	sql := fmt.Sprintf(
 		"SELECT count(distinct `%s`) as count from %s.%s",
 		c.ColumnName, c.DatabaseName, c.TableName)
 	err = c.DB.Raw(sql).Row().Scan(&ret)
+	c.distinctRows = ret
+	//fmt.Println("distinct rows returned from SQL")
 	return
 }

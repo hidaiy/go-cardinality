@@ -19,7 +19,8 @@ projects:
   bin: true
   build: false
   run: true
-  params: []
+  params:
+  - -config config.toml
   watcher:
     before: []
     after: []
