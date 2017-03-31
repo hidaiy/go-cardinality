@@ -42,19 +42,21 @@ func main() {
 		return
 	}
 
-	// カラムの取得
-	columns, err := informationSchema.TableColumns(config.Database)
-	if err != nil {
-		printError(err)
-		return
-	}
+	if len(tableRows) != 0 {
+		// カラムの取得
+		columns, err := informationSchema.TableColumns(config.Database)
+		if err != nil {
+			printError(err)
+			return
+		}
 
-	// 出力先の設定
-	writer := getWriter(commandLineOption.Out, config)
-	_, err = writer.WriteDDL(columns, tableRows)
-	if err != nil {
-		printError(err)
-		return
+		// 出力先の設定
+		writer := getWriter(commandLineOption.Out, config)
+		_, err = writer.WriteDDL(columns, tableRows)
+		if err != nil {
+			printError(err)
+			return
+		}
 	}
 }
 

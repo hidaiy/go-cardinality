@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"regexp"
 	"strconv"
 	"strings"
+	_ "unicode/utf8"
 )
 
 var CONSOLE_HEADER = []string{
@@ -21,10 +23,10 @@ var CONSOLE_HEADER = []string{
 }
 
 type Console struct {
-	out       io.Writer
-	threshold int
-	template  string
-	width     width
+	out            io.Writer
+	threshold      int
+	columnTemplate string
+	width          width
 }
 
 func NewConsole(out io.Writer, threshold int) *Console {
@@ -34,48 +36,69 @@ func NewConsole(out io.Writer, threshold int) *Console {
 	}
 }
 
-func (c *Console) WriteRow(row *Row) (int, error) {
-	return c.out.Write([]byte(c.String(row)))
-}
-func (c *Console) writeStringArray(array []string) (int, error) {
-
-	tmp := make([]interface{}, len(array), len(array))
-	for i := 0; i < len(array); i++ {
-		tmp[i] = array[i]
-	}
-
-	line := fmt.Sprintf(c.template, tmp...)
+func (c *Console) WriteRow(row []string) (int, error) {
+	line := fmt.Sprintf(c.columnTemplate, toInterfaces(row)...)
 	return c.out.Write([]byte(line))
 }
 
-func (c *Console) createRowTemplate(width width) string {
-	template := "%-" + ToString(width.tableName) + "s " +
-		"%-" + ToString(width.columnName) + "s " +
-		"%" + ToString(width.tableRows) + "s " +
-		"%" + ToString(width.distinctRows) + "s " +
-		"%" + ToString(width.cardinality) + "s " +
-		"%-" + ToString(width.indexes) + "s " +
-		"%-" + ToString(width.createIndexDDL) + "s " +
-		"%-" + ToString(width.dropIndexDDL) + "s \n"
-	c.template = template
+func (c *Console) WriteHeaderTopLine() (int, error) {
+	return c.writeSeparatorLine("┌", "┬", "┐")
+}
+
+func (c *Console) WriteHeaderBottomLine() (int, error) {
+	return c.writeSeparatorLine("├", "┼", "┤")
+}
+
+func (c *Console) WriteFooterLine() (int, error) {
+	return c.writeSeparatorLine("└", "┴", "┘")
+}
+
+func (c *Console) writeSeparatorLine(left, separator, right string) (int, error) {
+	tmp := make([]string, 0, len(c.width))
+
+	for _, w := range c.width {
+		tmp = append(tmp, strings.Repeat("-", w))
+	}
+
+	line := left + strings.Join(tmp, separator) + right + fmt.Sprintln()
+	return c.out.Write([]byte(line))
+}
+
+func getColumnTemplate(s string, width int) string {
+	var ret string
+
+	if isNumber(s) {
+		ret = "%"
+	} else {
+		ret = "%-"
+	}
+	ret = ret + toString(width) + "s"
+	return ret
+}
+
+// 1行分のテンプレートを作る
+func (c *Console) createTemplate(columnsSlice [][]string) string {
+
+	width := c.getWidth(columnsSlice)
+
+	// データ行用テンプレート
+	c.columnTemplate = c.createColumnTemplate(width, columnsSlice[1])
+	return c.columnTemplate
+}
+
+func (c *Console) createColumnTemplate(width []int, columns []string) string {
+	parts := make([]string, 0, len(columns))
+	for i := 0; i < len(width); i++ {
+		parts = append(parts, getColumnTemplate(columns[i], width[i]))
+	}
+	template := separator + strings.Join(parts, separator) + separator + fmt.Sprintln()
 	return template
 }
 
-func (r *Console) String(row *Row) string {
-	//fmt.Println(r.template)
-	return fmt.Sprintf(r.template,
-		row.TableName,
-		row.ColumnName,
-		ToString(row.TableRows),
-		ToString(row.DistinctRows),
-		ToString(row.Cardinality),
-		cut(strings.Join(row.Indexes, ","), 8),
-		cut(row.CreateIndexDDL, 8),
-		cut(row.DropIndexDDL, 8),
-	)
-}
-
-var maxLength = 8
+var maxLength = 12
+var separator = "|"
+var padding = 2
+var numberRegex = regexp.MustCompile(`[0-9]`)
 
 func cut(s string, length int) string {
 	if len(s) > maxLength {
@@ -84,53 +107,63 @@ func cut(s string, length int) string {
 	return s
 }
 
-type width struct {
-	tableName      int
-	columnName     int
-	tableRows      int
-	distinctRows   int
-	cardinality    int
-	indexes        int
-	createIndexDDL int
-	dropIndexDDL   int
+func isNumber(s string) bool {
+	return numberRegex.MatchString(s)
 }
 
-type widthLength int
+func toInterfaces(array []string) []interface{} {
+	ret := make([]interface{}, len(array), len(array))
+	for i := 0; i < len(array); i++ {
+		ret[i] = array[i]
+	}
+	return ret
+}
 
-func ToString(i int) string {
+type width []int
+
+// int
+func intsMap(ints []int, fn func(int) int) []int {
+	ret := make([]int, 0, len(ints))
+	for _, i := range ints {
+		ret = append(ret, fn(i))
+	}
+	return ret
+}
+
+func max(x, y int) int {
+	return int(math.Max(float64(x), float64(y)))
+}
+
+func toString(i int) string {
 	return strconv.FormatInt(int64(i), 10)
 }
 
-func length(i int) float64 {
-	return float64(len(strconv.FormatInt(int64(i), 10)))
+// 列ごとの文字数を計算する
+func (c *Console) getWidth(columnSlice [][]string) width {
+	ret := make([]int, len(columnSlice[0]), len(columnSlice[0]))
+
+	for _, columns := range columnSlice {
+		for i := 0; i < len(columns); i++ {
+			column := columns[i]
+			ret[i] = max(ret[i], len(column))
+		}
+	}
+
+	// 各列の幅にパディングをプラスする
+	ret = intsMap(ret, appendPadding)
+	c.width = ret
+
+	return ret
 }
 
-func (r *Console) WriteDDL(columns []Column, tableRows TableRows) (int, error) {
-	var row *Row
+func appendPadding(i int) int {
+	return i + padding
+}
 
-	width := width{}
-	for i := 0; i < len(columns); i++ {
-		column := columns[i]
-		width.tableName = int(math.Max(float64(width.tableName), float64(len(column.TableName))))
-		width.columnName = int(math.Max(float64(width.columnName), float64(len(column.ColumnName))))
+func (c *Console) WriteDDL(columns []Column, tableRows TableRows) (int, error) {
+	rowSlice := make([][]string, 0, len(columns))
 
-		//distinctRows, err := column.DistinctRows()
-		//if err != nil {
-		//	return 0, err
-		//}
-		//
-		//width.distinctRows = int(math.Max(length(width.distinctRows), length(distinctRows)))
-	}
-	width.tableRows = 7
-	width.distinctRows = 7
-	width.cardinality = 5
-	width.indexes = 10
-	width.createIndexDDL = 10
-	width.dropIndexDDL = 10
-	r.createRowTemplate(width)
-	//fmt.Printf("%#v", width)
-
-	r.writeStringArray(CONSOLE_HEADER)
+	rowSlice = append(rowSlice, CONSOLE_HEADER)
 	for _, column := range columns {
 
 		// テーブルのレコード件数
@@ -140,25 +173,46 @@ func (r *Console) WriteDDL(columns []Column, tableRows TableRows) (int, error) {
 		}
 
 		// インデックスジェネレーターの作成
-		indexGenerator, err := NewIndexGenerator(column, rows, r.threshold)
+		indexGenerator, err := NewIndexGenerator(column, rows, c.threshold)
 		if err != nil {
 			return 0, err
 		}
 
 		// １行分
-		row = &Row{
-			TableName:      column.TableName,
-			ColumnName:     column.ColumnName,
-			TableRows:      rows,
-			DistinctRows:   indexGenerator.DistinctTableRows,
-			Cardinality:    indexGenerator.GetColumnCardinality(),
-			Indexes:        indexGenerator.ExistingIndexNames,
-			CreateIndexDDL: indexGenerator.GenerateCreateIndexDDL(),
-			DropIndexDDL:   indexGenerator.GenerateDropIndexDDL(),
+		row := []string{
+			column.TableName,
+			column.ColumnName,
+			toString(rows),
+			toString(indexGenerator.DistinctTableRows),
+			toString(indexGenerator.GetColumnCardinality()),
+			cut(strings.Join(indexGenerator.ExistingIndexNames, ","), maxLength),
+			cut(indexGenerator.GenerateCreateIndexDDL(), maxLength),
+			cut(indexGenerator.GenerateDropIndexDDL(), maxLength),
 		}
 
-		// 出力
-		r.WriteRow(row)
+		rowSlice = append(rowSlice, row)
 	}
+
+	// テンプレートの作成
+	c.createTemplate(rowSlice)
+
+	// 出力
+
+	// ヘッダー上
+	c.WriteHeaderTopLine()
+
+	for i, row := range rowSlice {
+		if i == 1 {
+			// ヘッダー下
+			c.WriteHeaderBottomLine()
+		}
+		_, err := c.WriteRow(row)
+		if err != nil {
+			return 0, err
+		}
+	}
+	// フッター行
+	c.WriteFooterLine()
+
 	return 0, nil
 }
