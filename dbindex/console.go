@@ -97,7 +97,7 @@ func (c *Console) createColumnTemplate(width []int, columns []string) string {
 
 var maxLength = 12
 var separator = "|"
-var padding = 2
+var padding = 1
 var numberRegex = regexp.MustCompile(`[0-9]`)
 
 func cut(s string, length int) string {

@@ -68,6 +68,10 @@ func (i *indexGenerator) GenerateDropIndexDDL() string {
 
 // カラムのカーディナリティを計算して返す。
 func (i *indexGenerator) GetColumnCardinality() int {
+	if i.DistinctTableRows == 0 && i.TableRows == 0 {
+		return 0
+	}
+
 	tmp := float64(i.DistinctTableRows) / float64(i.TableRows)
 	return int(tmp * float64(100))
 }
