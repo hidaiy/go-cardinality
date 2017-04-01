@@ -30,31 +30,34 @@ func NewCSV(out io.Writer, threshold int) *CSV {
 	}
 }
 
-func (c CSV) WriteRow(row *Row) (int, error) {
-	return c.out.Write([]byte(c.csvString(row)))
-}
-func (c CSV) WriteStringArray(array []string) (int, error) {
-	return c.out.Write([]byte(strings.Join(array, ", ")))
-}
-func (r *CSV) csvString(row *Row) string {
-	return fmt.Sprintf("%s\n", strings.Join(row.StringArray(), ", "))
+func (c CSV) writeRow(row *Row) (int, error) {
+	return c.writeStringArray(row.StringArray())
 }
 
-func (r *CSV) WriteDDL(columns []Column, tableRows TableRows) (int, error) {
+func (c CSV) writeStringArray(array []string) (int, error) {
+	return c.write(strings.Join(array, ", "))
+}
+
+func (c CSV) write(s string) (int, error) {
+	return c.out.Write([]byte(s + fmt.Sprintln()))
+}
+
+func (r *CSV) WriteDDL(columns []Column, tableRows TableRows) error {
 	var row *Row
-	r.WriteStringArray(CSV_HEADER)
+	r.writeStringArray(CSV_HEADER)
+
 	for _, column := range columns {
 
-		// テーブルのレコード件数
+		// テーブルのレコード件数の取得
 		rows, ok := tableRows.GetRows(column.TableName)
 		if !ok {
-			return 0, errors.New(fmt.Sprintln("table count not found:", column.TableName))
+			return errors.New(fmt.Sprintln("table count not found:", column.TableName))
 		}
 
 		// インデックスジェネレーターの作成
 		indexGenerator, err := NewIndexGenerator(column, rows, r.threshold)
 		if err != nil {
-			return 0, err
+			return err
 		}
 
 		// １行分
@@ -70,7 +73,7 @@ func (r *CSV) WriteDDL(columns []Column, tableRows TableRows) (int, error) {
 		}
 
 		// 出力
-		r.WriteRow(row)
+		r.writeRow(row)
 	}
-	return 0, nil
+	return nil
 }

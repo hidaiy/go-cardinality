@@ -2,6 +2,7 @@ package dbindex
 
 import (
 	"fmt"
+	"strings"
 )
 
 type indexGenerator struct {
@@ -12,7 +13,13 @@ type indexGenerator struct {
 	DistinctTableRows  int
 	Threshold          int
 	IndexName          string
-	ExistingIndexNames []string
+	ExistingIndexNames stringArray
+}
+
+type stringArray []string
+
+func (s stringArray) CSV() string {
+	return strings.Join(s, ",")
 }
 
 func NewIndexGenerator(column Column, tableRows, threshold int) (*indexGenerator, error) {

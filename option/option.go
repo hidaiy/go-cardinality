@@ -4,7 +4,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 )
@@ -45,6 +44,22 @@ type CommandLineOption struct {
 	ConfigPath string
 }
 
+func New(out Out, configPath string) *CommandLineOption {
+	return &CommandLineOption{
+		Out:        out,
+		ConfigPath: configPath,
+	}
+}
+
+// ファイルパス
+func Exists(f string) error {
+	_, err := os.Stat(string(f))
+	if err != nil {
+		return errors.New("config is not exists.")
+	}
+	return nil
+}
+
 // 同じ値を持つ場合、trueを返す
 func (c *CommandLineOption) Equals(c2 *CommandLineOption) bool {
 	return c.Out == c2.Out &&
@@ -52,37 +67,21 @@ func (c *CommandLineOption) Equals(c2 *CommandLineOption) bool {
 }
 
 // コマンドラインオプションをパースし、CommandLineOptionにして返す
-func Parse() (commandLineOption *CommandLineOption, err error) {
+func Parse() (*CommandLineOption, error) {
 	var config, out string
 	flag.StringVar(&config, "config", "", "コンフィルファイルのパス")
 	flag.StringVar(&out, "out", "console", "出力方法")
 	flag.Parse()
 
-	err = validateConfigFilePath(config)
+	err := Exists(config)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	outputType, err := OutputTypeValueOf(out)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	commandLineOption = &CommandLineOption{
-		Out:        outputType,
-		ConfigPath: config,
-	}
-	return
-}
-
-// コマンドラインオプション 設定ファイルパス
-// 例： -config
-
-func validateConfigFilePath(input string) (err error) {
-	log.Println("-config:", input)
-	if _, err = os.Stat(input); err != nil {
-		err = errors.New("config is not exists.")
-		return err
-	}
-	return
+	return New(outputType, config), nil
 }

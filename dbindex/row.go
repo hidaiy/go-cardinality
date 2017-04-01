@@ -2,7 +2,7 @@ package dbindex
 
 import (
 	"fmt"
-	"strconv"
+	"github.com/hidai620/go-mysql-study/intutil"
 	"strings"
 )
 
@@ -21,9 +21,9 @@ func (r *Row) StringArray() []string {
 	var row = []string{
 		r.TableName,
 		r.ColumnName,
-		r.toString(r.TableRows),
-		r.toString(r.DistinctRows),
-		r.toString(r.Cardinality),
+		intutil.ToString(r.TableRows),
+		intutil.ToString(r.DistinctRows),
+		intutil.ToString(r.Cardinality),
 		r.PrintExistingIndexNames(),
 		r.CreateIndexDDL,
 		r.DropIndexDDL,
@@ -33,8 +33,4 @@ func (r *Row) StringArray() []string {
 
 func (r *Row) PrintExistingIndexNames() string {
 	return fmt.Sprintf("%q", strings.Join(r.Indexes, ", "))
-}
-
-func (r Row) toString(i int) string {
-	return strconv.FormatInt(int64(i), 10)
 }
