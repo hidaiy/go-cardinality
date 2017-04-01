@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/hidai620/go-mysql-study/config"
-	"github.com/hidai620/go-mysql-study/option"
 	. "github.com/hidai620/go-mysql-study/dbindex"
+	"github.com/hidai620/go-mysql-study/option"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"os"
 )
@@ -60,6 +60,7 @@ func main() {
 	}
 }
 
+// getWriter returns Writer according to command line argument.
 func getWriter(out option.Out, config *config.Config) Writer {
 	switch out {
 	case option.CONSOLE:
