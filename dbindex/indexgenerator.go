@@ -59,7 +59,7 @@ func (i *indexGenerator) GenerateCreateIndexDDL() string {
 	if i.NeedToCreateIndex() {
 		return fmt.Sprintf("alter table %s add index %s(%s);", i.TableName, i.IndexName, i.ColumnName)
 	} else {
-		return ""
+		return "[*1]"
 	}
 }
 

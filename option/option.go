@@ -9,14 +9,14 @@ import (
 )
 
 // アウトプットタイプ
-type Out int
+type OutputType int
 
 const (
-	CONSOLE Out = iota
+	CONSOLE OutputType = iota
 	CSV
 )
 
-func OutputTypeValueOf(o string) (Out, error) {
+func OutputTypeValueOf(o string) (OutputType, error) {
 	switch strings.ToUpper(o) {
 	case "CONSOLE":
 		return CONSOLE, nil
@@ -27,7 +27,7 @@ func OutputTypeValueOf(o string) (Out, error) {
 	}
 }
 
-func (o Out) Name() string {
+func (o OutputType) Name() string {
 	var ret string
 	switch o {
 	case CONSOLE:
@@ -38,16 +38,19 @@ func (o Out) Name() string {
 	return ret
 }
 
-// コマンドライン引数
+// CommandLineOption has command line arguments.
 type CommandLineOption struct {
-	Out        Out
+	Out        OutputType
 	ConfigPath string
+	TableName  string
 }
 
-func New(out Out, configPath string) *CommandLineOption {
+// New returns CommandLineOption created with arguments
+func New(out OutputType, configPath, tableName string) *CommandLineOption {
 	return &CommandLineOption{
 		Out:        out,
 		ConfigPath: configPath,
+		TableName:  tableName,
 	}
 }
 
@@ -55,7 +58,7 @@ func New(out Out, configPath string) *CommandLineOption {
 func Exists(f string) error {
 	_, err := os.Stat(string(f))
 	if err != nil {
-		return errors.New(fmt.Sprintf("config file is not exists. %s", f))
+		return errors.New(fmt.Sprintf("Specified file is not exists. %s", f))
 	}
 	return nil
 }
@@ -68,9 +71,10 @@ func (c *CommandLineOption) Equals(c2 *CommandLineOption) bool {
 
 // コマンドラインオプションをパースし、CommandLineOptionにして返す
 func Parse() (*CommandLineOption, error) {
-	var config, out string
+	var config, out, tableName string
 	flag.StringVar(&config, "config", "config.toml", "Absolute or relrative path of config file.")
 	flag.StringVar(&out, "out", "console", `Output type of result. "console" or "csv"`)
+	flag.StringVar(&tableName, "table", "", `Analyze Target table name.`)
 	flag.Parse()
 
 	err := Exists(config)
@@ -83,5 +87,5 @@ func Parse() (*CommandLineOption, error) {
 		return nil, err
 	}
 
-	return New(outputType, config), nil
+	return New(outputType, config, tableName), nil
 }

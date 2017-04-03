@@ -21,6 +21,7 @@ projects:
   run: true
   params:
   - -config config.toml
+  - -table titles
   watcher:
     before: []
     after: []

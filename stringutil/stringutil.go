@@ -18,6 +18,7 @@ func ToInterfaces(array []string) []interface{} {
 	return ret
 }
 
+// ToString converts interface array to string array.
 func ToStrings(array []interface{}) ([]string, error) {
 	ret := make([]string, 0, len(array))
 	for i := 0; i < len(array); i++ {
@@ -45,6 +46,7 @@ func IsNumber(s string) bool {
 	return numberRegex.MatchString(s)
 }
 
+// String Cutter
 type Cutter struct {
 	maxLength int
 	tail      string

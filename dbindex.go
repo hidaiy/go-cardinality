@@ -36,7 +36,7 @@ func main() {
 	informationSchema := NewInformationSchema(db)
 
 	// テーブル単位の件数の取得
-	tableRows, err := informationSchema.TableRows(conf.Database)
+	tableRows, err := informationSchema.TableRows(conf.Database, opt.TableName)
 	if err != nil {
 		printError(err)
 		return
@@ -44,7 +44,7 @@ func main() {
 
 	if len(tableRows) != 0 {
 		// カラムの取得
-		columns, err := informationSchema.TableColumns(conf.Database)
+		columns, err := informationSchema.TableColumns(conf.Database, opt.TableName)
 		if err != nil {
 			printError(err)
 			return
@@ -61,7 +61,7 @@ func main() {
 }
 
 // getWriter returns Writer according to command line argument.
-func getWriter(out option.Out, config *config.Config) Writer {
+func getWriter(out option.OutputType, config *config.Config) Writer {
 	switch out {
 	case option.CONSOLE:
 		return NewConsole(os.Stdout, config)
