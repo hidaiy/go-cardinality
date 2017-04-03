@@ -55,7 +55,7 @@ func New(out Out, configPath string) *CommandLineOption {
 func Exists(f string) error {
 	_, err := os.Stat(string(f))
 	if err != nil {
-		return errors.New("config is not exists.")
+		return errors.New(fmt.Sprintf("config file is not exists. %s", f))
 	}
 	return nil
 }
@@ -69,8 +69,8 @@ func (c *CommandLineOption) Equals(c2 *CommandLineOption) bool {
 // コマンドラインオプションをパースし、CommandLineOptionにして返す
 func Parse() (*CommandLineOption, error) {
 	var config, out string
-	flag.StringVar(&config, "config", "", "コンフィルファイルのパス")
-	flag.StringVar(&out, "out", "console", "出力方法")
+	flag.StringVar(&config, "config", "config.toml", "Absolute or relrative path of config file.")
+	flag.StringVar(&out, "out", "console", `Output type of result. "console" or "csv"`)
 	flag.Parse()
 
 	err := Exists(config)

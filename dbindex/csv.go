@@ -39,14 +39,14 @@ func (c CSV) write(s string) (int, error) {
 	return c.out.Write([]byte(s + fmt.Sprintln()))
 }
 
-func (r *CSV) WriteDDL(columns []Column, tableRows TableRows) error {
+func (c *CSV) WriteDDL(columns []Column, tableRows TableRows) error {
 	var row *Row
-	r.writeRow(CSV_HEADER)
+	c.writeRow(CSV_HEADER)
 
 	for _, column := range columns {
 		// 対象外のカラムは処理から除外する
-		if r.config.HasIgnoreConfig() {
-			isIgnore, err := r.config.IsIgnoreColumn(column.TableName, column.ColumnName)
+		if c.config.HasIgnoreConfig() {
+			isIgnore, err := c.config.IsIgnoreColumn(column.TableName, column.ColumnName)
 			if err != nil {
 				return err
 			}
@@ -62,7 +62,7 @@ func (r *CSV) WriteDDL(columns []Column, tableRows TableRows) error {
 		}
 
 		// インデックスジェネレーターの作成
-		indexGenerator, err := NewIndexGenerator(column, rows, r.config.Threshold)
+		indexGenerator, err := NewIndexGenerator(column, rows, c.config.Threshold)
 		if err != nil {
 			return err
 		}
@@ -80,7 +80,7 @@ func (r *CSV) WriteDDL(columns []Column, tableRows TableRows) error {
 		}
 
 		// 出力
-		r.writeRow(row.StringArray())
+		c.writeRow(row.StringArray())
 	}
 	return nil
 }

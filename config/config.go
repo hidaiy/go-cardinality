@@ -8,14 +8,14 @@ import (
 )
 
 type Config struct {
-	User      string
-	Password  string
-	Host      string
-	Port      int
-	Dialect   string
-	Database  string
-	Threshold int
-	Ignore    IgnoreColumns
+	User          string
+	Password      string
+	Host          string
+	Port          int
+	Dialect       string
+	Database      string
+	Threshold     int
+	IgnoreColumns IgnoreColumns `toml:"ignore"`
 }
 
 const configFileName = "config.toml"
@@ -30,7 +30,7 @@ func Load(path string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("ignore columns:", config.Ignore)
+	fmt.Println("ignore columns:", config.IgnoreColumns)
 
 	return config, nil
 }
@@ -38,10 +38,10 @@ func Load(path string) (*Config, error) {
 type IgnoreColumns map[string]interface{}
 
 func (c Config) HasIgnoreConfig() bool {
-	return len(c.Ignore) != 0
+	return len(c.IgnoreColumns) != 0
 }
 func (c Config) IsIgnoreColumn(table, column string) (bool, error) {
-	return c.Ignore.Contains(table, column)
+	return c.IgnoreColumns.Contains(table, column)
 }
 
 func (i IgnoreColumns) HasConfig() bool {

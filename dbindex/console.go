@@ -37,6 +37,7 @@ func NewConsole(out io.Writer, config *config.Config) *Console {
 // WriteDDL writes ddl.
 func (c *Console) WriteDDL(columns []Column, tableRows TableRows) error {
 
+	// get table body data
 	body, err := c.getBody(columns, tableRows)
 	if err != nil {
 		return err
