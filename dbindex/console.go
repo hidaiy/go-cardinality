@@ -3,6 +3,7 @@ package dbindex
 import (
 	"errors"
 	"fmt"
+	"github.com/hidai620/go-mysql-study/config"
 	"github.com/hidai620/go-mysql-study/consoleTable"
 	iutil "github.com/hidai620/go-mysql-study/intutil"
 	sutil "github.com/hidai620/go-mysql-study/stringutil"
@@ -22,14 +23,14 @@ var CONSOLE_HEADER = []string{
 }
 
 type Console struct {
-	out       io.Writer
-	threshold int
+	out    io.Writer
+	config *config.Config
 }
 
-func NewConsole(out io.Writer, threshold int) *Console {
+func NewConsole(out io.Writer, config *config.Config) *Console {
 	return &Console{
-		out:       out,
-		threshold: threshold,
+		out:    out,
+		config: config,
 	}
 }
 
@@ -50,8 +51,6 @@ func (c *Console) WriteDDL(columns []Column, tableRows TableRows) error {
 	return nil
 }
 
-const maxLength = 12
-
 // body is table body rows
 type body [][]string
 
@@ -63,7 +62,16 @@ func (c *Console) getBody(columns []Column, tableRows TableRows) (body, error) {
 	body := newBody(len(columns))
 
 	for _, column := range columns {
-		// :TODO 対象外からむの判定の追加
+		// 対象外のカラムは処理から除外する
+		if c.config.HasIgnoreConfig() {
+			isIgnore, err := c.config.IsIgnoreColumn(column.TableName, column.ColumnName)
+			if err != nil {
+				return nil, err
+			}
+			if isIgnore {
+				continue
+			}
+		}
 
 		// テーブルのレコード件数
 		rows, ok := tableRows.GetRows(column.TableName)
@@ -72,7 +80,7 @@ func (c *Console) getBody(columns []Column, tableRows TableRows) (body, error) {
 		}
 
 		// インデックスジェネレーターの作成
-		indexGenerator, err := NewIndexGenerator(column, rows, c.threshold)
+		indexGenerator, err := NewIndexGenerator(column, rows, c.config.Threshold)
 		if err != nil {
 			return nil, err
 		}
@@ -84,9 +92,9 @@ func (c *Console) getBody(columns []Column, tableRows TableRows) (body, error) {
 			iutil.ToString(rows),
 			iutil.ToString(indexGenerator.DistinctTableRows),
 			iutil.ToString(indexGenerator.GetColumnCardinality()),
-			sutil.Cut(indexGenerator.ExistingIndexNames.CSV(), maxLength),
-			sutil.Cut(indexGenerator.GenerateCreateIndexDDL(), maxLength),
-			sutil.Cut(indexGenerator.GenerateDropIndexDDL(), maxLength),
+			sutil.Cut(indexGenerator.ExistingIndexNames.CSV()),
+			sutil.Cut(indexGenerator.GenerateCreateIndexDDL()),
+			sutil.Cut(indexGenerator.GenerateDropIndexDDL()),
 		}
 
 		body = append(body, row)

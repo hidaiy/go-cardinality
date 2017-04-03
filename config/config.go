@@ -1,8 +1,10 @@
 package config
 
 import (
+	"errors"
+	"fmt"
 	"github.com/BurntSushi/toml"
-	"log"
+	"github.com/hidai620/go-mysql-study/stringutil"
 )
 
 type Config struct {
@@ -13,18 +15,49 @@ type Config struct {
 	Dialect   string
 	Database  string
 	Threshold int
+	Ignore    IgnoreColumns
 }
 
 const configFileName = "config.toml"
 
-func Load(path string) (config *Config, err error) {
+func Load(path string) (*Config, error) {
 	if path == "" {
 		path = configFileName
 	}
-	log.Println("path:", path)
 
-	if _, err = toml.DecodeFile(path, &config); err != nil {
-		return
+	var config = &Config{}
+	_, err := toml.DecodeFile(path, &config)
+	if err != nil {
+		return nil, err
 	}
-	return
+	fmt.Println("ignore columns:", config.Ignore)
+
+	return config, nil
+}
+
+type IgnoreColumns map[string]interface{}
+
+func (c Config) HasIgnoreConfig() bool {
+	return len(c.Ignore) != 0
+}
+func (c Config) IsIgnoreColumn(table, column string) (bool, error) {
+	return c.Ignore.Contains(table, column)
+}
+
+func (i IgnoreColumns) HasConfig() bool {
+	return len(i) != 0
+}
+
+func (i IgnoreColumns) Contains(table, column string) (bool, error) {
+	value, ok := i[table]
+	if !ok {
+		return false, nil
+	}
+
+	columns, err := stringutil.ToStrings(value.([]interface{}))
+	if err != nil {
+		return false, errors.New(fmt.Sprintf("Ignore config is not valid. %#v", value))
+	}
+
+	return stringutil.Contains(columns, column), nil
 }

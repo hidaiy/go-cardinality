@@ -6,5 +6,6 @@ dialect   = "mysql"
 database  = "employees"
 threshold = 60
 
-#IgnoreTables:
-#IgnoreColumns:
+[ignore]
+departments = ["dept_no"]
+employees = ["emp_no", "birth_date"]

@@ -64,11 +64,11 @@ func main() {
 func getWriter(out option.Out, config *config.Config) Writer {
 	switch out {
 	case option.CONSOLE:
-		return NewConsole(os.Stdout, config.Threshold)
+		return NewConsole(os.Stdout, config)
 	case option.CSV:
-		return NewCSV(os.Stdout, config.Threshold)
+		return NewCSV(os.Stdout, config)
 	default:
-		return NewConsole(os.Stdout, config.Threshold)
+		return NewConsole(os.Stdout, config)
 	}
 }
 
