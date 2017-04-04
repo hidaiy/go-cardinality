@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strings"
 )
 
 type stringArray []string
@@ -18,6 +19,14 @@ func ToInterfaces(array []string) []interface{} {
 	return ret
 }
 
+func NotEmpty(array []string) bool {
+	return len(array) != 0
+}
+
+func Empty(array []string) bool {
+	return len(array) != 0
+}
+
 // ToString converts interface array to string array.
 func ToStrings(array []interface{}) ([]string, error) {
 	ret := make([]string, 0, len(array))
@@ -30,6 +39,33 @@ func ToStrings(array []interface{}) ([]string, error) {
 		ret = append(ret, v)
 	}
 	return ret, nil
+}
+
+func StringToStringArray(s string, separator string) []string {
+	var ret []string
+	if s == "" {
+		ret = make([]string, 0)
+	} else {
+		if strings.Contains(s, separator) {
+			fmt.Println(s)
+			ret = strings.Split(s, separator)
+			fmt.Println(ret)
+
+		} else {
+			ret = make([]string, 1)
+			ret[0] = s
+		}
+	}
+
+	return ret
+}
+
+func Map(array []string, fn func(s string) string) []string {
+	var ret []string = make([]string, len(array))
+	for i, v := range array {
+		ret[i] = fn(v)
+	}
+	return ret
 }
 
 func Contains(array []string, s string) bool {

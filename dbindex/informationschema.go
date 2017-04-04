@@ -1,6 +1,7 @@
 package dbindex
 
 import (
+	sutil "github.com/hidai620/go-mysql-study/stringutil"
 	"github.com/jinzhu/gorm"
 )
 
@@ -26,8 +27,8 @@ func (t TableRows) GetRows(tableName string) (int, bool) {
 }
 
 // TableRows returns each rows of tables searched with given database name from information schema.
-func (inf *InformationSchema) TableRows(databaseName, tableName string) (TableRows, error) {
-	tables, err := inf.Tables(databaseName, tableName)
+func (inf *InformationSchema) TableRows(databaseName string, tableNames []string) (TableRows, error) {
+	tables, err := inf.Tables(databaseName, tableNames)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +40,7 @@ func (inf *InformationSchema) TableRows(databaseName, tableName string) (TableRo
 }
 
 // データベース内のカラムの一覧を返す
-func (inf *InformationSchema) TableColumns(databaseName, tableName string) ([]Column, error) {
+func (inf *InformationSchema) TableColumns(databaseName string, tableNames []string) ([]Column, error) {
 	var columns []Column
 	sql := `select c.table_schema as database_name,
 		       c.table_name,
@@ -50,10 +51,12 @@ func (inf *InformationSchema) TableColumns(databaseName, tableName string) ([]Co
 		   and t.table_type = 'BASE TABLE'
 		 where c.table_schema = ?
 		`
-	if tableName != "" {
+	params := NewParam(databaseName)
+	if sutil.NotEmpty(tableNames) {
 		sql = sql + ` and c.table_name in (?)`
+		params.Add(tableNames)
 	}
-	result := inf.DB.Raw(sql, databaseName, tableName).Scan(&columns)
+	result := inf.DB.Raw(sql, params.value...).Scan(&columns)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -68,7 +71,7 @@ func (inf *InformationSchema) TableColumns(databaseName, tableName string) ([]Co
 }
 
 // テーブル単位の件数の取得
-func (i *InformationSchema) Tables(databaseName, tableName string) ([]Table, error) {
+func (i *InformationSchema) Tables(databaseName string, tableNames []string) ([]Table, error) {
 	var ret []Table
 	sql := `select table_name as name,
 			table_rows as rows
@@ -77,10 +80,12 @@ func (i *InformationSchema) Tables(databaseName, tableName string) ([]Table, err
 		   and table_rows is not null
 		   and table_type = 'BASE TABLE'
 		`
-	if tableName != "" {
+	param := NewParam(databaseName)
+	if sutil.NotEmpty(tableNames) {
 		sql = sql + ` and table_name in (?)`
+		param.Add(tableNames)
 	}
 
-	result := i.DB.Raw(sql, databaseName, tableName).Scan(&ret)
+	result := i.DB.Raw(sql, param.value...).Scan(&ret)
 	return ret, result.Error
 }

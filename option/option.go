@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	sutil "github.com/hidai620/go-mysql-study/stringutil"
 	"os"
 	"strings"
 )
@@ -37,20 +38,23 @@ func (o OutputType) Name() string {
 	}
 	return ret
 }
+func (o OutputType) String() string {
+	return o.Name()
+}
 
 // CommandLineOption has command line arguments.
 type CommandLineOption struct {
 	Out        OutputType
 	ConfigPath string
-	TableName  string
+	TableNames []string
 }
 
 // New returns CommandLineOption created with arguments
-func New(out OutputType, configPath, tableName string) *CommandLineOption {
+func New(out OutputType, configPath string, tableNames []string) *CommandLineOption {
 	return &CommandLineOption{
 		Out:        out,
 		ConfigPath: configPath,
-		TableName:  tableName,
+		TableNames: tableNames,
 	}
 }
 
@@ -71,10 +75,10 @@ func (c *CommandLineOption) Equals(c2 *CommandLineOption) bool {
 
 // コマンドラインオプションをパースし、CommandLineOptionにして返す
 func Parse() (*CommandLineOption, error) {
-	var config, out, tableName string
+	var config, out, tableNames string
 	flag.StringVar(&config, "config", "config.toml", "Absolute or relrative path of config file.")
 	flag.StringVar(&out, "out", "console", `Output type of result. "console" or "csv"`)
-	flag.StringVar(&tableName, "table", "", `Analyze Target table name.`)
+	flag.StringVar(&tableNames, "table", "", `Analyze Target table name.`)
 	flag.Parse()
 
 	err := Exists(config)
@@ -87,5 +91,6 @@ func Parse() (*CommandLineOption, error) {
 		return nil, err
 	}
 
-	return New(outputType, config, tableName), nil
+	tableNamesArray := sutil.StringToStringArray(tableNames, ",")
+	return New(outputType, config, tableNamesArray), nil
 }

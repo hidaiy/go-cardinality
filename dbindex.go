@@ -1,33 +1,36 @@
 package main
 
 import (
-	"fmt"
 	"github.com/hidai620/go-mysql-study/config"
 	. "github.com/hidai620/go-mysql-study/dbindex"
 	"github.com/hidai620/go-mysql-study/option"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"log"
 	"os"
 )
 
 func main() {
+	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime|log.Llongfile)
+
 	// コマンドラインオプションのパース
 	opt, err := option.Parse()
 	if err != nil {
-		printError(err)
+		logger.Println(err)
 		return
 	}
+	logger.Printf("option: %#v", opt)
 
 	//　設定ファイルの読み込み
 	conf, err := config.Load(opt.ConfigPath)
 	if err != nil {
-		printError(err)
+		logger.Println(err)
 		return
 	}
 
 	// DB接続
 	db, err := Connect(conf)
 	if err != nil {
-		printError(err)
+		logger.Println(err)
 		return
 	}
 	defer db.Close()
@@ -36,17 +39,17 @@ func main() {
 	informationSchema := NewInformationSchema(db)
 
 	// テーブル単位の件数の取得
-	tableRows, err := informationSchema.TableRows(conf.Database, opt.TableName)
+	tableRows, err := informationSchema.TableRows(conf.Database, opt.TableNames)
 	if err != nil {
-		printError(err)
+		logger.Println(err)
 		return
 	}
 
 	if len(tableRows) != 0 {
 		// カラムの取得
-		columns, err := informationSchema.TableColumns(conf.Database, opt.TableName)
+		columns, err := informationSchema.TableColumns(conf.Database, opt.TableNames)
 		if err != nil {
-			printError(err)
+			logger.Println(err)
 			return
 		}
 
@@ -54,7 +57,7 @@ func main() {
 		writer := getWriter(opt.Out, conf)
 		err = writer.WriteDDL(columns, tableRows)
 		if err != nil {
-			printError(err)
+			logger.Println(err)
 			return
 		}
 	}
@@ -70,8 +73,4 @@ func getWriter(out option.OutputType, config *config.Config) Writer {
 	default:
 		return NewConsole(os.Stdout, config)
 	}
-}
-
-func printError(err error) {
-	fmt.Fprintln(os.Stderr, err.Error())
 }
