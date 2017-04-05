@@ -3,10 +3,10 @@ package dbindex
 import (
 	"errors"
 	"fmt"
-	"github.com/hidai620/go-mysql-study/config"
-	"github.com/hidai620/go-mysql-study/consoleTable"
-	iutil "github.com/hidai620/go-mysql-study/intutil"
-	sutil "github.com/hidai620/go-mysql-study/stringutil"
+	"github.com/hidai620/go-cardinality/config"
+	"github.com/hidai620/go-cardinality/consoleTable"
+	iutil "github.com/hidai620/go-cardinality/intutil"
+	sutil "github.com/hidai620/go-cardinality/stringutil"
 	"io"
 	_ "unicode/utf8"
 )

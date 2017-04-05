@@ -4,7 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	sutil "github.com/hidai620/go-mysql-study/stringutil"
+	sutil "github.com/hidai620/go-cardinality/stringutil"
 	"os"
 	"strings"
 )

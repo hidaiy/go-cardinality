@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/BurntSushi/toml"
-	"github.com/hidai620/go-mysql-study/stringutil"
+	"github.com/hidai620/go-cardinality/stringutil"
 )
 
 type Config struct {

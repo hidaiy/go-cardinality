@@ -2,7 +2,7 @@ package dbindex
 
 import (
 	"fmt"
-	cnf "github.com/hidai620/go-mysql-study/config"
+	cnf "github.com/hidai620/go-cardinality/config"
 	"github.com/jinzhu/gorm"
 )
 

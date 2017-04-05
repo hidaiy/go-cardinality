@@ -2,7 +2,7 @@ package dbindex
 
 import (
 	"fmt"
-	"github.com/hidai620/go-mysql-study/intutil"
+	"github.com/hidai620/go-cardinality/intutil"
 	"strings"
 )
 

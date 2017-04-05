@@ -2,7 +2,7 @@ package consoleTable
 
 import (
 	"fmt"
-	sutil "github.com/hidai620/go-mysql-study/stringutil"
+	sutil "github.com/hidai620/go-cardinality/stringutil"
 	"io"
 	"strings"
 )

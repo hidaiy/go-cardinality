@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/hidai620/go-mysql-study/config"
-	. "github.com/hidai620/go-mysql-study/dbindex"
-	"github.com/hidai620/go-mysql-study/option"
+	"github.com/hidai620/go-cardinality/config"
+	. "github.com/hidai620/go-cardinality/dbindex"
+	"github.com/hidai620/go-cardinality/option"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"log"
 	"os"
@@ -18,7 +18,7 @@ func main() {
 		logger.Println(err)
 		return
 	}
-	logger.Printf("option: %#v", opt)
+	// logger.Printf("option: %#v", opt)
 
 	//　設定ファイルの読み込み
 	conf, err := config.Load(opt.ConfigPath)

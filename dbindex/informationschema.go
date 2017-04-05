@@ -1,7 +1,7 @@
 package dbindex
 
 import (
-	sutil "github.com/hidai620/go-mysql-study/stringutil"
+	sutil "github.com/hidai620/go-cardinality/stringutil"
 	"github.com/jinzhu/gorm"
 )
 

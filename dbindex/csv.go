@@ -3,7 +3,7 @@ package dbindex
 import (
 	"errors"
 	"fmt"
-	"github.com/hidai620/go-mysql-study/config"
+	"github.com/hidai620/go-cardinality/config"
 	"io"
 	"strings"
 )

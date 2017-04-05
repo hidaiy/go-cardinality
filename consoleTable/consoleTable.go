@@ -1,7 +1,7 @@
 package consoleTable
 
 import (
-	iutil "github.com/hidai620/go-mysql-study/intutil"
+	iutil "github.com/hidai620/go-cardinality/intutil"
 	"io"
 )
 
