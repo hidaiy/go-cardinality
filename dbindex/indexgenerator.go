@@ -2,6 +2,7 @@ package dbindex
 
 import (
 	"fmt"
+	. "github.com/hidai620/go-cardinality/database"
 	"strings"
 )
 

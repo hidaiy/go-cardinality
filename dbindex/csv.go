@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/hidai620/go-cardinality/config"
+	. "github.com/hidai620/go-cardinality/database"
 	"io"
 	"strings"
 )

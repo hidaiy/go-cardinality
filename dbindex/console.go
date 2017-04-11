@@ -9,6 +9,7 @@ import (
 	sutil "github.com/hidai620/go-cardinality/stringutil"
 	"io"
 	_ "unicode/utf8"
+	. "github.com/hidai620/go-cardinality/database"
 )
 
 var CONSOLE_HEADER = []string{

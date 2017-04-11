@@ -1,7 +1,11 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"github.com/hidai620/go-cardinality/config"
+	"github.com/hidai620/go-cardinality/database"
+	"github.com/hidai620/go-cardinality/database/mysql"
 	. "github.com/hidai620/go-cardinality/dbindex"
 	"github.com/hidai620/go-cardinality/option"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -26,43 +30,16 @@ func main() {
 		return
 	}
 
-	// DB接続
-	db, err := Connect(conf)
-	if err != nil {
-		logger.Println(err)
-		return
-	}
-	defer db.Close()
-
-	// :TODO DB依存の抽象化
-
 	// 管理スキーマの取得
-	informationSchema := NewInformationSchema(db)
-
-	/*
-	 info := database.GetSchemaInformation()
-	 writer := getWriter(opt.Out, conf)
-	 writer.WriteDDL(info)
-	*/
-
-	// テーブル単位の件数の取得
-	tableRows, err := informationSchema.TableRows(conf.Database, opt.TableNames)
+	dataBase, err := getDatabase(conf, logger)
 	if err != nil {
 		logger.Println(err)
 		return
 	}
+	info := dataBase.GetSchemaInformation(conf.Database, opt.TableNames)
 
-	// カラムの取得
-	columns, err := informationSchema.TableColumns(conf.Database, opt.TableNames)
-	if err != nil {
-		logger.Println(err)
-		return
-	}
-	// ------------------------------------
-
-	// 出力先の設定
 	writer := getWriter(opt.Out, conf)
-	err = writer.WriteDDL(columns, tableRows)
+	err = writer.WriteDDL(info.Columns, info.TableRows)
 	if err != nil {
 		logger.Println(err)
 		return
@@ -78,5 +55,20 @@ func getWriter(out option.OutputType, config *config.Config) Writer {
 		return NewCSV(os.Stdout, config)
 	default:
 		return NewConsole(os.Stdout, config)
+	}
+}
+
+func getDatabase(conf *config.Config, logger *log.Logger) (database.Database, error) {
+	db, err := database.Connect(conf)
+	if err != nil {
+		logger.Println(err)
+		return nil, err
+	}
+
+	switch conf.Dialect {
+	case "mysql":
+		return mysql.MySQL{Logger: logger, DB: db}, nil
+	default:
+		return nil, errors.New(fmt.Sprintf("database not found:%#v", conf.Dialect))
 	}
 }

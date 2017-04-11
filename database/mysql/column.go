@@ -1,16 +1,9 @@
-package dbindex
+package mysql
 
 import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 )
-
-type IColumn interface {
-	Column() string
-	Table() string
-	IndexNames() ([]string, error)
-	DistinctRows() (int, error)
-}
 
 type Column struct {
 	DB           *gorm.DB

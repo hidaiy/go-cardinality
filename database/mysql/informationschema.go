@@ -1,6 +1,7 @@
-package dbindex
+package mysql
 
 import (
+	. "github.com/hidai620/go-cardinality/database"
 	sutil "github.com/hidai620/go-cardinality/stringutil"
 	"github.com/jinzhu/gorm"
 )
@@ -15,15 +16,6 @@ func NewInformationSchema(db *gorm.DB) *InformationSchema {
 	return &InformationSchema{
 		DB: db,
 	}
-}
-
-// TableRows has rows of each tables.
-type TableRows map[string]int
-
-// GetRows returns rows searched with given table name.
-func (t TableRows) GetRows(tableName string) (int, bool) {
-	rows, ok := t[tableName]
-	return rows, ok
 }
 
 // TableRows returns each rows of tables searched with given database name from information schema.
@@ -56,7 +48,7 @@ func (inf *InformationSchema) TableColumns(databaseName string, tableNames []str
 		sql = sql + ` and c.table_name in (?)`
 		params.Add(tableNames)
 	}
-	result := inf.DB.Raw(sql, params.values...).Scan(&columns)
+	result := inf.DB.Raw(sql, params.Values...).Scan(&columns)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -89,7 +81,7 @@ func (i *InformationSchema) Tables(databaseName string, tableNames []string) ([]
 		param.Add(tableNames)
 	}
 
-	result := i.DB.Raw(sql, param.values...).Scan(&ret)
+	result := i.DB.Raw(sql, param.Values...).Scan(&ret)
 	return ret, result.Error
 }
 
