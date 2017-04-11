@@ -40,7 +40,7 @@ func (inf *InformationSchema) TableRows(databaseName string, tableNames []string
 }
 
 // データベース内のカラムの一覧を返す
-func (inf *InformationSchema) TableColumns(databaseName string, tableNames []string) ([]Column, error) {
+func (inf *InformationSchema) TableColumns(databaseName string, tableNames []string) ([]IColumn, error) {
 	var columns []Column
 	sql := `select c.table_schema as database_name,
 		       c.table_name,
@@ -51,23 +51,26 @@ func (inf *InformationSchema) TableColumns(databaseName string, tableNames []str
 		   and t.table_type = 'BASE TABLE'
 		 where c.table_schema = ?
 		`
-	params := NewParam(databaseName)
+	params := NewParams(databaseName)
 	if sutil.NotEmpty(tableNames) {
 		sql = sql + ` and c.table_name in (?)`
 		params.Add(tableNames)
 	}
-	result := inf.DB.Raw(sql, params.value...).Scan(&columns)
+	result := inf.DB.Raw(sql, params.values...).Scan(&columns)
 
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
 	// カラムにDBコネクションを追加
+	ret := make([]IColumn, 0, len(columns))
 	for i := 0; i < len(columns); i++ {
-		columns[i].DB = inf.DB
+		c := columns[i]
+		c.DB = inf.DB
+		ret = append(ret, &c)
 	}
 
-	return columns, result.Error
+	return ret, result.Error
 }
 
 // テーブル単位の件数の取得
@@ -80,12 +83,19 @@ func (i *InformationSchema) Tables(databaseName string, tableNames []string) ([]
 		   and table_rows is not null
 		   and table_type = 'BASE TABLE'
 		`
-	param := NewParam(databaseName)
+	param := NewParams(databaseName)
 	if sutil.NotEmpty(tableNames) {
 		sql = sql + ` and table_name in (?)`
 		param.Add(tableNames)
 	}
 
-	result := i.DB.Raw(sql, param.value...).Scan(&ret)
+	result := i.DB.Raw(sql, param.values...).Scan(&ret)
 	return ret, result.Error
+}
+
+type Table struct {
+	DB           *gorm.DB
+	DatabaseName string
+	Name         string
+	Rows         int
 }

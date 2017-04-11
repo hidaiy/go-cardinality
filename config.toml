@@ -7,5 +7,5 @@ database  = "employees"
 threshold = 60
 
 [ignore]
-departments = ["dept_no"]
+departments = ["*"]
 employees = ["emp_no", "birth_date"]

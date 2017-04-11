@@ -35,7 +35,7 @@ func NewConsole(out io.Writer, config *config.Config) *Console {
 }
 
 // WriteDDL writes ddl.
-func (c *Console) WriteDDL(columns []Column, tableRows TableRows) error {
+func (c *Console) WriteDDL(columns []IColumn, tableRows TableRows) error {
 
 	// get table body data
 	body, err := c.getBody(columns, tableRows)
@@ -55,17 +55,19 @@ func (c *Console) WriteDDL(columns []Column, tableRows TableRows) error {
 // body is table body rows
 type body [][]string
 
+// newBody returns table body instance.
 func newBody(size int) body {
 	return make([][]string, 0, size)
 }
 
-func (c *Console) getBody(columns []Column, tableRows TableRows) (body, error) {
+// getBody returns result table body.
+func (c *Console) getBody(columns []IColumn, tableRows TableRows) (body, error) {
 	body := newBody(len(columns))
 
-	for _, column := range columns {
+	for _, col := range columns {
 		// 対象外のカラムは処理から除外する
-		if c.config.HasIgnoreConfig() {
-			isIgnore, err := c.config.IsIgnoreColumn(column.TableName, column.ColumnName)
+		if c.config.Ignore.HasConfig() {
+			isIgnore, err := c.config.Ignore.IsIgnoreColumn(col.Table(), col.Column())
 			if err != nil {
 				return nil, err
 			}
@@ -75,21 +77,21 @@ func (c *Console) getBody(columns []Column, tableRows TableRows) (body, error) {
 		}
 
 		// テーブルのレコード件数
-		rows, ok := tableRows.GetRows(column.TableName)
+		rows, ok := tableRows.GetRows(col.Table())
 		if !ok {
-			return nil, errors.New(fmt.Sprintln("table count not found:", column.TableName))
+			return nil, errors.New(fmt.Sprintf("table count not found: %s\n", col.Table()))
 		}
 
 		// インデックスジェネレーターの作成
-		indexGenerator, err := NewIndexGenerator(column, rows, c.config.Threshold)
+		indexGenerator, err := NewIndexGenerator(col, rows, c.config.Threshold)
 		if err != nil {
 			return nil, err
 		}
 
 		// body 1行分
 		row := []string{
-			column.TableName,
-			column.ColumnName,
+			col.Table(),
+			col.Column(),
 			iutil.ToString(rows),
 			iutil.ToString(indexGenerator.DistinctTableRows),
 			iutil.ToString(indexGenerator.GetColumnCardinality()),

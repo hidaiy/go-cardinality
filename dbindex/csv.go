@@ -39,14 +39,14 @@ func (c CSV) write(s string) (int, error) {
 	return c.out.Write([]byte(s + fmt.Sprintln()))
 }
 
-func (c *CSV) WriteDDL(columns []Column, tableRows TableRows) error {
+func (c *CSV) WriteDDL(columns []IColumn, tableRows TableRows) error {
 	var row *Row
 	c.writeRow(CSV_HEADER)
 
-	for _, column := range columns {
+	for _, col := range columns {
 		// 対象外のカラムは処理から除外する
-		if c.config.HasIgnoreConfig() {
-			isIgnore, err := c.config.IsIgnoreColumn(column.TableName, column.ColumnName)
+		if c.config.Ignore.HasConfig() {
+			isIgnore, err := c.config.Ignore.IsIgnoreColumn(col.Table(), col.Column())
 			if err != nil {
 				return err
 			}
@@ -56,21 +56,21 @@ func (c *CSV) WriteDDL(columns []Column, tableRows TableRows) error {
 		}
 
 		// テーブルのレコード件数の取得
-		rows, ok := tableRows.GetRows(column.TableName)
+		rows, ok := tableRows.GetRows(col.Table())
 		if !ok {
-			return errors.New(fmt.Sprintln("table count not found:", column.TableName))
+			return errors.New(fmt.Sprintln("table count not found:", col.Table()))
 		}
 
 		// インデックスジェネレーターの作成
-		indexGenerator, err := NewIndexGenerator(column, rows, c.config.Threshold)
+		indexGenerator, err := NewIndexGenerator(col, rows, c.config.Threshold)
 		if err != nil {
 			return err
 		}
 
 		// １行分
 		row = &Row{
-			TableName:      column.TableName,
-			ColumnName:     column.ColumnName,
+			TableName:      col.Table(),
+			ColumnName:     col.Column(),
 			TableRows:      rows,
 			DistinctRows:   indexGenerator.DistinctTableRows,
 			Cardinality:    indexGenerator.GetColumnCardinality(),

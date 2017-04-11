@@ -9,7 +9,7 @@ settings:
     host: localhost
     port: 5001
 projects:
-- name: go-mysql-study
+- name: go-cardinality
   path: .
   fmt: true
   generate: false

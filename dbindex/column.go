@@ -5,6 +5,13 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+type IColumn interface {
+	Column() string
+	Table() string
+	IndexNames() ([]string, error)
+	DistinctRows() (int, error)
+}
+
 type Column struct {
 	DB           *gorm.DB
 	DatabaseName string
@@ -13,8 +20,22 @@ type Column struct {
 	distinctRows int
 }
 
-// テーブル単位の件数の取得
-func (c *Column) ExistingIndexes() ([]Index, error) {
+type Index struct {
+	Name       string
+	TableName  string
+	ColumnName string
+}
+
+func (c *Column) Table() string {
+	return c.TableName
+}
+
+func (c *Column) Column() string {
+	return c.ColumnName
+}
+
+// Indexes returns indexes belongs with this column.
+func (c *Column) indexes() ([]Index, error) {
 	var ret []Index
 	result := c.DB.Raw(`
                  select index_name as name
@@ -28,9 +49,9 @@ func (c *Column) ExistingIndexes() ([]Index, error) {
 	return ret, result.Error
 }
 
-// 既存のIndex名のリストを返す
-func (c *Column) ExistingIndexNames() ([]string, error) {
-	indexes, err := c.ExistingIndexes()
+// IndexNames returns index names belongs with this column.
+func (c *Column) IndexNames() ([]string, error) {
+	indexes, err := c.indexes()
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +65,6 @@ func (c *Column) ExistingIndexNames() ([]string, error) {
 // 重複を省いた件数を返す。
 func (c *Column) DistinctRows() (ret int, err error) {
 	if c.distinctRows != 0 {
-		//fmt.Println("distinct rows returned from property")
 		return c.distinctRows, nil
 	}
 	sql := fmt.Sprintf(
@@ -52,6 +72,5 @@ func (c *Column) DistinctRows() (ret int, err error) {
 		c.ColumnName, c.DatabaseName, c.TableName)
 	err = c.DB.Raw(sql).Row().Scan(&ret)
 	c.distinctRows = ret
-	//fmt.Println("distinct rows returned from SQL")
 	return
 }

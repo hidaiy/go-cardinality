@@ -41,16 +41,13 @@ func ToStrings(array []interface{}) ([]string, error) {
 	return ret, nil
 }
 
-func StringToStringArray(s string, separator string) []string {
+func Split(s string, separator string) []string {
 	var ret []string
 	if s == "" {
 		ret = make([]string, 0)
 	} else {
 		if strings.Contains(s, separator) {
-			fmt.Println(s)
 			ret = strings.Split(s, separator)
-			fmt.Println(ret)
-
 		} else {
 			ret = make([]string, 1)
 			ret[0] = s

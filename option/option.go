@@ -91,6 +91,6 @@ func Parse() (*CommandLineOption, error) {
 		return nil, err
 	}
 
-	tableNamesArray := sutil.StringToStringArray(tableNames, ",")
+	tableNamesArray := sutil.Split(tableNames, ",")
 	return New(outputType, config, tableNamesArray), nil
 }

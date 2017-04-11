@@ -6,7 +6,7 @@ import (
 )
 
 type indexGenerator struct {
-	Column             Column
+	Column             IColumn
 	TableName          string
 	ColumnName         string
 	TableRows          int
@@ -22,7 +22,7 @@ func (s stringArray) CSV() string {
 	return strings.Join(s, ",")
 }
 
-func NewIndexGenerator(column Column, tableRows, threshold int) (*indexGenerator, error) {
+func NewIndexGenerator(column IColumn, tableRows, threshold int) (*indexGenerator, error) {
 	// 重複を除いた件数
 	distinctTableRows, err := column.DistinctRows()
 	if err != nil {
@@ -30,19 +30,19 @@ func NewIndexGenerator(column Column, tableRows, threshold int) (*indexGenerator
 	}
 
 	// Indexのリスト
-	indexNames, err := column.ExistingIndexNames()
+	indexNames, err := column.IndexNames()
 	if err != nil {
 		return nil, err
 	}
 
 	ret := &indexGenerator{
 		Column:             column,
-		TableName:          column.TableName,
-		ColumnName:         column.ColumnName,
+		TableName:          column.Table(),
+		ColumnName:         column.Column(),
 		TableRows:          tableRows,
 		DistinctTableRows:  distinctTableRows,
 		Threshold:          threshold,
-		IndexName:          indexName(column.TableName, column.ColumnName),
+		IndexName:          indexName(column.Table(), column.Column()),
 		ExistingIndexNames: indexNames,
 	}
 	return ret, nil

@@ -5,21 +5,26 @@ import (
 	"fmt"
 	"github.com/BurntSushi/toml"
 	"github.com/hidai620/go-cardinality/stringutil"
+	"log"
 )
 
 type Config struct {
-	User          string
-	Password      string
-	Host          string
-	Port          int
-	Dialect       string
-	Database      string
-	Threshold     int
-	IgnoreColumns IgnoreColumns `toml:"ignore"`
+	User      string
+	Password  string
+	Host      string
+	Port      int
+	Dialect   string
+	Database  string
+	Threshold int
+	Ignore    Ignore `toml:"ignore"`
 }
 
-const configFileName = "config.toml"
+const (
+	configFileName  = "config.toml"
+	ignoreAllColumn = "*"
+)
 
+// Load returns config loaded with argument file path.
 func Load(path string) (*Config, error) {
 	if path == "" {
 		path = configFileName
@@ -30,25 +35,28 @@ func Load(path string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("ignore columns:", config.IgnoreColumns)
+	log.Println("ignore columns:", config.Ignore)
 
 	return config, nil
 }
 
-type IgnoreColumns map[string]interface{}
+// Ignore has exclude tables, or columns config.
+type Ignore map[string]interface{}
 
-func (c Config) HasIgnoreConfig() bool {
-	return len(c.IgnoreColumns) != 0
-}
-func (c Config) IsIgnoreColumn(table, column string) (bool, error) {
-	return c.IgnoreColumns.Contains(table, column)
-}
-
-func (i IgnoreColumns) HasConfig() bool {
+//
+func (i Ignore) HasConfig() bool {
 	return len(i) != 0
 }
 
-func (i IgnoreColumns) Contains(table, column string) (bool, error) {
+func (i Ignore) IsIgnoreTable(table string) bool {
+	value, ok := i[table]
+	if ok {
+		return value == ignoreAllColumn
+	}
+	return false
+}
+
+func (i Ignore) IsIgnoreColumn(table, column string) (bool, error) {
 	value, ok := i[table]
 	if !ok {
 		return false, nil
