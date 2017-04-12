@@ -59,11 +59,11 @@ func ParseCommandLineOption() (*Option, error) {
 	}
 
 	// table flag check
-	if allTable && tableNames != "" {
+	if isBothTableOptionSpecified(allTable, tableNames) {
 		return nil, errors.New("You can specity flag, table or allTable.")
 	}
 
-	if !allTable && tableNames == "" {
+	if isNotSpecifiedTables(allTable, tableNames) {
 		return nil, errors.New("Prease specity flag, table or allTable.")
 	}
 
@@ -77,7 +77,15 @@ func ParseCommandLineOption() (*Option, error) {
 	return NewOption(outputType, config, tableNamesArray), nil
 }
 
-// CommandLineOption has command line arguments.
+func isBothTableOptionSpecified(allTable bool, tableNames string) bool {
+	return allTable && tableNames != ""
+}
+
+func isNotSpecifiedTables(allTable bool, tableNames string) bool {
+	return !allTable && tableNames == ""
+}
+
+// Option has command line arguments.
 type Option struct {
 	Out        OutputType
 	ConfigPath string
