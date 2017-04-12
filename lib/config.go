@@ -48,6 +48,8 @@ func (i Ignore) HasConfig() bool {
 	return len(i) != 0
 }
 
+// IsIgnoreTable returns true if table name is specified in config file as Ignore table,
+// and has "*"  as column name.
 func (i Ignore) IsIgnoreTable(table string) bool {
 	value, ok := i[table]
 	if ok {
