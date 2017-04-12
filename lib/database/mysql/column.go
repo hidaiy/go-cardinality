@@ -23,6 +23,7 @@ func (c *Column) Table() string {
 	return c.TableName
 }
 
+//
 func (c *Column) Column() string {
 	return c.ColumnName
 }

@@ -2,12 +2,12 @@ package dbindex
 
 import (
 	"fmt"
-	. "github.com/hidai620/go-cardinality/database"
+	db "github.com/hidai620/go-cardinality/lib/database"
 	"strings"
 )
 
 type indexGenerator struct {
-	Column             IColumn
+	Column             db.Column
 	TableName          string
 	ColumnName         string
 	TableRows          int
@@ -23,7 +23,7 @@ func (s stringArray) CSV() string {
 	return strings.Join(s, ",")
 }
 
-func NewIndexGenerator(column IColumn, tableRows, threshold int) (*indexGenerator, error) {
+func newIndexGenerator(column db.Column, tableRows, threshold int) (*indexGenerator, error) {
 	// 重複を除いた件数
 	distinctTableRows, err := column.DistinctRows()
 	if err != nil {

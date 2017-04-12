@@ -1,40 +1,35 @@
 settings:
   resources:
-    streams: streams.log
+    outputs: outputs.log
     logs: logs.log
     errors: errors.log
   server:
-    enable: true
+    status: false
     open: false
     host: localhost
     port: 5001
-  config:
-    flimit: 0
 projects:
 - name: go-cardinality
-  path: /
+  path: .
   fmt: true
-  test: false
   generate: false
+  test: false
   bin: true
   build: false
   run: true
   params:
   - -config config.toml
-  - -table titles,salaries
+  - -table dept_manager,employees
   watcher:
-    before: []
-    after: []
+    preview: false
     paths:
     - /
     ignore_paths:
     - vendor
     exts:
     - .go
-    preview: false
-  cli:
-    streams: true
-  file:
-    streams: false
-    logs: false
-    errors: false
+  streams:
+    cli_out: true
+    file_out: false
+    file_log: false
+    file_err: false

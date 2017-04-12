@@ -1,10 +1,10 @@
-package config
+package dbindex
 
 import (
 	"errors"
 	"fmt"
 	"github.com/BurntSushi/toml"
-	"github.com/hidai620/go-cardinality/stringutil"
+	"github.com/hidai620/go-utils/stringutil"
 	"log"
 )
 
@@ -25,7 +25,7 @@ const (
 )
 
 // Load returns config loaded with argument file path.
-func Load(path string) (*Config, error) {
+func LoadConfig(path string) (*Config, error) {
 	if path == "" {
 		path = configFileName
 	}

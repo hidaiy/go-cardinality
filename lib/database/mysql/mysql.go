@@ -1,17 +1,24 @@
 package mysql
 
 import (
-	"github.com/hidai620/go-cardinality/database"
+	"github.com/hidai620/go-cardinality/lib/database"
 	"github.com/jinzhu/gorm"
 	"log"
 )
 
-type MySQL struct {
+type mySQL struct {
 	Logger *log.Logger
 	DB     *gorm.DB
 }
 
-func (m MySQL) GetSchemaInformation(databaseName string, tableNames []string) *database.SchemaInformation {
+func New(logger *log.Logger, db *gorm.DB) *mySQL {
+	return &mySQL{
+		Logger: logger,
+		DB:     db,
+	}
+}
+
+func (m mySQL) GetSchemaInformation(databaseName string, tableNames []string) *database.SchemaInformation {
 	// 管理スキーマの取得
 	informationSchema := NewInformationSchema(m.DB)
 

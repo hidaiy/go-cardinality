@@ -1,8 +1,8 @@
 package mysql
 
 import (
-	. "github.com/hidai620/go-cardinality/database"
-	sutil "github.com/hidai620/go-cardinality/stringutil"
+	db "github.com/hidai620/go-cardinality/lib/database"
+	sutil "github.com/hidai620/go-utils/stringutil"
 	"github.com/jinzhu/gorm"
 )
 
@@ -19,7 +19,7 @@ func NewInformationSchema(db *gorm.DB) *InformationSchema {
 }
 
 // TableRows returns each rows of tables searched with given database name from information schema.
-func (inf *InformationSchema) TableRows(databaseName string, tableNames []string) (TableRows, error) {
+func (inf *InformationSchema) TableRows(databaseName string, tableNames []string) (db.TableRows, error) {
 	tables, err := inf.Tables(databaseName, tableNames)
 	if err != nil {
 		return nil, err
@@ -32,7 +32,7 @@ func (inf *InformationSchema) TableRows(databaseName string, tableNames []string
 }
 
 // データベース内のカラムの一覧を返す
-func (inf *InformationSchema) TableColumns(databaseName string, tableNames []string) ([]IColumn, error) {
+func (inf *InformationSchema) TableColumns(databaseName string, tableNames []string) ([]db.Column, error) {
 	var columns []Column
 	sql := `select c.table_schema as database_name,
 		       c.table_name,
@@ -43,7 +43,7 @@ func (inf *InformationSchema) TableColumns(databaseName string, tableNames []str
 		   and t.table_type = 'BASE TABLE'
 		 where c.table_schema = ?
 		`
-	params := NewParams(databaseName)
+	params := db.NewParams(databaseName)
 	if sutil.NotEmpty(tableNames) {
 		sql = sql + ` and c.table_name in (?)`
 		params.Add(tableNames)
@@ -55,7 +55,7 @@ func (inf *InformationSchema) TableColumns(databaseName string, tableNames []str
 	}
 
 	// カラムにDBコネクションを追加
-	ret := make([]IColumn, 0, len(columns))
+	ret := make([]db.Column, 0, len(columns))
 	for i := 0; i < len(columns); i++ {
 		c := columns[i]
 		c.DB = inf.DB
@@ -75,7 +75,7 @@ func (i *InformationSchema) Tables(databaseName string, tableNames []string) ([]
 		   and table_rows is not null
 		   and table_type = 'BASE TABLE'
 		`
-	param := NewParams(databaseName)
+	param := db.NewParams(databaseName)
 	if sutil.NotEmpty(tableNames) {
 		sql = sql + ` and table_name in (?)`
 		param.Add(tableNames)
