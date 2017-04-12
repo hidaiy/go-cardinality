@@ -42,17 +42,32 @@ func (o OutputType) String() string {
 
 // Parse parses command line flags.
 func ParseCommandLineOption() (*Option, error) {
-	var config, out, tableNames string
+	var (
+		config, out, tableNames string
+		allTable                bool
+	)
 	flag.StringVar(&config, "config", "config.toml", "Absolute or relrative path of config file.")
 	flag.StringVar(&out, "out", "console", `Output type of result. "console" or "csv"`)
 	flag.StringVar(&tableNames, "table", "", `Analyze Target table name.`)
+	flag.BoolVar(&allTable, "allTable", false, `Analyze all table.`)
 	flag.Parse()
 
+	// check where config file exists.
 	err := existsFile(config)
 	if err != nil {
 		return nil, err
 	}
 
+	// table flag check
+	if allTable && tableNames != "" {
+		return nil, errors.New("You can specity flag, table or allTable.")
+	}
+
+	if !allTable && tableNames == "" {
+		return nil, errors.New("Prease specity flag, table or allTable.")
+	}
+
+	// get OutputType
 	outputType, err := GetOutputType(out)
 	if err != nil {
 		return nil, err

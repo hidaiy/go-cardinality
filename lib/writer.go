@@ -24,12 +24,11 @@ type Writer interface {
 
 // baseWriter
 type baseWriter struct {
-	out       io.Writer
-	config    *Config
-	createRow createRow
+	out    io.Writer
+	config *Config
 }
 
-// createRow is a function.
+// createRow is a function to create row from indexGenerator.
 type createRow func(i *indexGenerator) []string
 
 // body is table body rows
