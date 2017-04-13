@@ -3,10 +3,10 @@ package main
 import (
 	"errors"
 	"fmt"
-	. "github.com/hidai620/go-cardinality/lib"
-	db "github.com/hidai620/go-cardinality/lib/database"
-	"github.com/hidai620/go-cardinality/lib/database/mysql"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	. "github.com/june-twenty/go-cardinality/lib"
+	db "github.com/june-twenty/go-cardinality/lib/database"
+	"github.com/june-twenty/go-cardinality/lib/database/mysql"
 	"log"
 	"os"
 )

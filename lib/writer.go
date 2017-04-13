@@ -3,7 +3,7 @@ package dbindex
 import (
 	"errors"
 	"fmt"
-	db "github.com/hidai620/go-cardinality/lib/database"
+	db "github.com/june-twenty/go-cardinality/lib/database"
 	"io"
 )
 

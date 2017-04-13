@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/BurntSushi/toml"
-	"github.com/hidai620/go-utils/stringutil"
+	"github.com/june-twenty/go-utils/stringutil"
 	"log"
 )
 

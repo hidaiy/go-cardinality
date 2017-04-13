@@ -1,10 +1,10 @@
 package dbindex
 
 import (
-	db "github.com/hidai620/go-cardinality/lib/database"
-	iutil "github.com/hidai620/go-utils/intutil"
-	sutil "github.com/hidai620/go-utils/stringutil"
-	"github.com/hidai620/go-utils/table"
+	db "github.com/june-twenty/go-cardinality/lib/database"
+	iutil "github.com/june-twenty/go-utils/intutil"
+	sutil "github.com/june-twenty/go-utils/stringutil"
+	"github.com/june-twenty/go-utils/table"
 	"io"
 )
 

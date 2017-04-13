@@ -2,8 +2,8 @@ package dbindex
 
 import (
 	"fmt"
-	db "github.com/hidai620/go-cardinality/lib/database"
-	iutil "github.com/hidai620/go-utils/intutil"
+	db "github.com/june-twenty/go-cardinality/lib/database"
+	iutil "github.com/june-twenty/go-utils/intutil"
 	"io"
 	"strings"
 )
