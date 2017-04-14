@@ -7,6 +7,7 @@ import (
 	"io"
 )
 
+// RESULT_HEADER is used to out put table's header.
 var RESULT_HEADER = []string{
 	"table_name",
 	"column_name",
@@ -18,6 +19,7 @@ var RESULT_HEADER = []string{
 	"drop_index_ddl",
 }
 
+// Writer
 type Writer interface {
 	WriteDDL(*db.SchemaInformation) error
 }
@@ -40,11 +42,11 @@ func newBody(size int) body {
 }
 
 // getBody returns result table body.
-func (c *baseWriter) createBody(columns []db.Column, tableRows db.TableRows, fn createRow) (body, error) {
+func (c *baseWriter) createBody(columns []db.Column, tableRows db.TableRows, createRowFunction createRow) (body, error) {
 	body := newBody(len(columns))
 
 	for _, col := range columns {
-		// 対象外のカラムは処理から除外する
+		// Exclude column if it is specified as ignore column.
 		if c.config.Ignore.HasConfig() {
 			isIgnore, err := c.config.Ignore.IsIgnoreColumn(col.Table(), col.Column())
 			if err != nil {
@@ -55,20 +57,20 @@ func (c *baseWriter) createBody(columns []db.Column, tableRows db.TableRows, fn 
 			}
 		}
 
-		// テーブルのレコード件数
+		// Get table rows
 		rows, ok := tableRows.GetRows(col.Table())
 		if !ok {
 			return nil, errors.New(fmt.Sprintf("table count not found: %s\n", col.Table()))
 		}
 
-		// インデックスジェネレーターの作成
+		// Get new IndexGenerator.
 		indexGenerator, err := newIndexGenerator(col, rows, c.config.Threshold)
 		if err != nil {
 			return nil, err
 		}
 
-		// body 1行分
-		row := fn(indexGenerator)
+		// Create row for result column list.
+		row := createRowFunction(indexGenerator)
 
 		body = append(body, row)
 	}

@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// アウトプットタイプ
+// OutputType
 type OutputType int
 
 const (
@@ -18,6 +18,8 @@ const (
 	CSV
 )
 
+// GetOutPutType is factory function of OutputType.
+// It returns OutputType from string.
 func GetOutputType(o string) (OutputType, error) {
 	switch strings.ToUpper(o) {
 	case "CONSOLE":
@@ -29,6 +31,7 @@ func GetOutputType(o string) (OutputType, error) {
 	}
 }
 
+// String returns OutputType as human readable string.
 func (o OutputType) String() string {
 	var ret string
 	switch o {
@@ -77,10 +80,12 @@ func ParseCommandLineOption() (*Option, error) {
 	return NewOption(outputType, config, tableNamesArray), nil
 }
 
+// isBothTableOptionSpecified returns true if allTable is true, and tableNames is not empty.
 func isBothTableOptionSpecified(allTable bool, tableNames string) bool {
 	return allTable && tableNames != ""
 }
 
+// isNotSpecifiedTables returns true argument does not have some values.
 func isNotSpecifiedTables(allTable bool, tableNames string) bool {
 	return !allTable && tableNames == ""
 }
@@ -101,7 +106,7 @@ func NewOption(out OutputType, configPath string, tableNames []string) *Option {
 	}
 }
 
-// 同じ値を持つ場合、trueを返す
+// Equals returns true if argument is save structure, and has same value.
 func (c *Option) Equals(c2 *Option) bool {
 	return c.Out == c2.Out &&
 		c.ConfigPath == c2.ConfigPath

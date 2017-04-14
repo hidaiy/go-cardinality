@@ -8,6 +8,7 @@ import (
 	"log"
 )
 
+// Config
 type Config struct {
 	User      string
 	Password  string
@@ -16,7 +17,7 @@ type Config struct {
 	Dialect   string
 	Database  string
 	Threshold int
-	Ignore    Ignore `toml:"ignore"`
+	Ignore    ignore `toml:"ignore"`
 }
 
 const (
@@ -41,16 +42,16 @@ func LoadConfig(path string) (*Config, error) {
 }
 
 // Ignore has exclude tables, or columns config.
-type Ignore map[string]interface{}
+type ignore map[string]interface{}
 
-//
-func (i Ignore) HasConfig() bool {
+// HasConfig returns true if config.toml has ignore tables config.
+func (i ignore) HasConfig() bool {
 	return len(i) != 0
 }
 
 // IsIgnoreTable returns true if table name is specified in config file as Ignore table,
 // and has "*"  as column name.
-func (i Ignore) IsIgnoreTable(table string) bool {
+func (i ignore) IsIgnoreTable(table string) bool {
 	value, ok := i[table]
 	if ok {
 		return value == ignoreAllColumn
@@ -58,7 +59,8 @@ func (i Ignore) IsIgnoreTable(table string) bool {
 	return false
 }
 
-func (i Ignore) IsIgnoreColumn(table, column string) (bool, error) {
+// IsIgnoreColumn returns true, if table and column are specified in config file as Ignore Column.
+func (i ignore) IsIgnoreColumn(table, column string) (bool, error) {
 	value, ok := i[table]
 	if !ok {
 		return false, nil
