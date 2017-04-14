@@ -63,11 +63,11 @@ func ParseCommandLineOption() (*Option, error) {
 
 	// table flag check
 	if isBothTableOptionSpecified(allTable, tableNames) {
-		return nil, errors.New("You can specity flag, table or allTable.")
+		return nil, errors.New("You can specity table or allTable.")
 	}
 
 	if isNotSpecifiedTables(allTable, tableNames) {
-		return nil, errors.New("Prease specity flag, table or allTable.")
+		return nil, errors.New("Prease specity table or allTable.")
 	}
 
 	// get OutputType

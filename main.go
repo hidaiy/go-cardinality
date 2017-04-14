@@ -17,7 +17,7 @@ func main() {
 	// コマンドラインオプションのパース
 	opt, err := ParseCommandLineOption()
 	if err != nil {
-		logger.Println(err)
+		fmt.Printf("NOTICE: %s", err)
 		return
 	}
 
