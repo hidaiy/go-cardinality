@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	. "github.com/june-twenty/go-cardinality/lib"
-	db "github.com/june-twenty/go-cardinality/lib/database"
-	"github.com/june-twenty/go-cardinality/lib/database/mysql"
+	. "github.com/hidaiy/go-cardinality/lib"
+	db "github.com/hidaiy/go-cardinality/lib/database"
+	"github.com/hidaiy/go-cardinality/lib/database/mysql"
 	"log"
 	"os"
 )

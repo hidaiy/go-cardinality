@@ -4,7 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	sutil "github.com/june-twenty/go-utils/stringutil"
+	sutil "github.com/hidaiy/go-utils/stringutil"
 	"os"
 	"strings"
 )

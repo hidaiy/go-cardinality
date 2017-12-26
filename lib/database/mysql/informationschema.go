@@ -2,8 +2,8 @@ package mysql
 
 import (
 	"github.com/jinzhu/gorm"
-	db "github.com/june-twenty/go-cardinality/lib/database"
-	sutil "github.com/june-twenty/go-utils/stringutil"
+	db "github.com/hidaiy/go-cardinality/lib/database"
+	sutil "github.com/hidaiy/go-utils/stringutil"
 )
 
 // InformationSchema is a struct to access MySQL information schema.

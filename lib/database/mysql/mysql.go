@@ -2,7 +2,7 @@ package mysql
 
 import (
 	"github.com/jinzhu/gorm"
-	"github.com/june-twenty/go-cardinality/lib/database"
+	"github.com/hidaiy/go-cardinality/lib/database"
 	"log"
 )
 
