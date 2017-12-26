@@ -24,14 +24,14 @@ func (inf *InformationSchema) TableRows(databaseName string, tableNames []string
 	if err != nil {
 		return nil, err
 	}
-	tableRows := make(map[string]int)
+	tableRows := db.NewTableRows()
 	for _, t := range tables {
 		tableRows[t.Name] = t.Rows
 	}
 	return tableRows, nil
 }
 
-// データベース内のカラムの一覧を返す
+// TableColumns returns table names, column names, listed from MySQL Information Schema.
 func (inf *InformationSchema) TableColumns(databaseName string, tableNames []string) ([]db.Column, error) {
 	var columns []Column
 	sql := `select c.table_schema as database_name,
@@ -54,7 +54,7 @@ func (inf *InformationSchema) TableColumns(databaseName string, tableNames []str
 		return nil, result.Error
 	}
 
-	// カラムにDBコネクションを追加
+	// Add connection to column.
 	ret := make([]db.Column, 0, len(columns))
 	for i := 0; i < len(columns); i++ {
 		c := columns[i]
@@ -65,7 +65,8 @@ func (inf *InformationSchema) TableColumns(databaseName string, tableNames []str
 	return ret, result.Error
 }
 
-// テーブル単位の件数の取得
+// Tables returns Table slice having table names and rows.
+// It does not include view.
 func (i *InformationSchema) Tables(databaseName string, tableNames []string) ([]Table, error) {
 	var ret []Table
 	sql := `select table_name as name,
@@ -85,6 +86,7 @@ func (i *InformationSchema) Tables(databaseName string, tableNames []string) ([]
 	return ret, result.Error
 }
 
+// Table
 type Table struct {
 	DB           *gorm.DB
 	DatabaseName string

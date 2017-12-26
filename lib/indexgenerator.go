@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// indexGenerator
 type indexGenerator struct {
 	Column             db.Column
 	TableName          string
@@ -17,20 +18,23 @@ type indexGenerator struct {
 	ExistingIndexNames stringArray
 }
 
+// stringArray is alias of string array type.
 type stringArray []string
 
+// CSV returns stringArray as csv string.
 func (s stringArray) CSV() string {
 	return strings.Join(s, ",")
 }
 
+// newIndexGenerator is constructor.
 func newIndexGenerator(column db.Column, tableRows, threshold int) (*indexGenerator, error) {
-	// 重複を除いた件数
+	// Getting distinct rows of column.
 	distinctTableRows, err := column.DistinctRows()
 	if err != nil {
 		return nil, err
 	}
 
-	// Indexのリスト
+	// Getting index names as string array.
 	indexNames, err := column.IndexNames()
 	if err != nil {
 		return nil, err
@@ -49,13 +53,13 @@ func newIndexGenerator(column db.Column, tableRows, threshold int) (*indexGenera
 	return ret, nil
 }
 
-// インデックス名を返す。
+// indexName returns index name created from table and column names.
 func indexName(tableName, columnName string) string {
 	return fmt.Sprintf("i_%s__%s", tableName, columnName)
 }
 
-// CREATEインデックス文を生成して返す。
-// カーディナリティが閾値を満たさない場合は空文字を返す。
+// GenerateCreateIndexDDL returns create index ddl, created from table and column names.
+// If cardinality of column is under threshold, returns empty string.
 func (i *indexGenerator) GenerateCreateIndexDDL() string {
 	if i.NeedToCreateIndex() {
 		return fmt.Sprintf("alter table %s add index %s(%s);", i.TableName, i.IndexName, i.ColumnName)
@@ -64,8 +68,8 @@ func (i *indexGenerator) GenerateCreateIndexDDL() string {
 	}
 }
 
-// DROPインデックス文を生成して返す。
-// カーディナリティが閾値を満たさない場合は空文字を返す。
+// GenerateDropIndexDDL returns drop index ddl created from table and column names.
+// If cardinality of column is under threshold, returns empty string.
 func (i *indexGenerator) GenerateDropIndexDDL() string {
 	if i.NeedToCreateIndex() {
 		return fmt.Sprintf("alter table %s drop index %s;", i.TableName, i.IndexName)
@@ -74,7 +78,7 @@ func (i *indexGenerator) GenerateDropIndexDDL() string {
 	}
 }
 
-// カラムのカーディナリティを計算して返す。
+// GetColumnCardinality returns cardinality.
 func (i *indexGenerator) GetColumnCardinality() int {
 	if i.DistinctTableRows == 0 && i.TableRows == 0 {
 		return 0
@@ -84,7 +88,8 @@ func (i *indexGenerator) GetColumnCardinality() int {
 	return int(tmp * float64(100))
 }
 
-// カーディナリティが閾値以上、かつ、このカラムに対して既存のインデックスが存在しない場合trueを返す。
+// NeedToCreateIndex returns true if column's cardinality is higher threshold,
+// and columns does not have indexes.
 func (i *indexGenerator) NeedToCreateIndex() bool {
 	return i.GetColumnCardinality() >= i.Threshold && len(i.ExistingIndexNames) == 0
 }

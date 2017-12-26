@@ -6,11 +6,13 @@ import (
 	"log"
 )
 
+// mySQL
 type mySQL struct {
 	Logger *log.Logger
 	DB     *gorm.DB
 }
 
+// New is a constructor of mySQL
 func New(logger *log.Logger, db *gorm.DB) *mySQL {
 	return &mySQL{
 		Logger: logger,
@@ -18,18 +20,19 @@ func New(logger *log.Logger, db *gorm.DB) *mySQL {
 	}
 }
 
+// GetSchemaInformation returns SchemaInformation including rows of tables and column information.
 func (m mySQL) GetSchemaInformation(databaseName string, tableNames []string) *database.SchemaInformation {
-	// 管理スキーマの取得
+	// Get information schema
 	informationSchema := NewInformationSchema(m.DB)
 
-	// テーブル単位の件数の取得
+	// Get table information having each table name and rows pair.
 	tableRows, err := informationSchema.TableRows(databaseName, tableNames)
 	if err != nil {
 		m.Logger.Println(err)
 		return nil
 	}
 
-	// カラムの取得
+	// Get columns having column's distinct rows, index names, and more.
 	columns, err := informationSchema.TableColumns(databaseName, tableNames)
 	if err != nil {
 		m.Logger.Println(err)

@@ -5,6 +5,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+// Column
 type Column struct {
 	DB           *gorm.DB
 	DatabaseName string
@@ -13,17 +14,19 @@ type Column struct {
 	distinctRows int
 }
 
+// Index
 type Index struct {
 	Name       string
 	TableName  string
 	ColumnName string
 }
 
+// Table returns table name as string.
 func (c *Column) Table() string {
 	return c.TableName
 }
 
-//
+// Column returns column name as string.
 func (c *Column) Column() string {
 	return c.ColumnName
 }
@@ -56,7 +59,7 @@ func (c *Column) IndexNames() ([]string, error) {
 	return ret, nil
 }
 
-// 重複を省いた件数を返す。
+// DistinctRows returns distinct rows that is similar to SQL query "select distinct column...".
 func (c *Column) DistinctRows() (ret int, err error) {
 	if c.distinctRows != 0 {
 		return c.distinctRows, nil

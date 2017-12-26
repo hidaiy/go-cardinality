@@ -10,7 +10,7 @@ settings:
     port: 5001
 projects:
 - name: go-cardinality
-  path: /
+  path: .
   fmt: true
   generate: false
   test: false

@@ -12,6 +12,7 @@ func NewParams(v interface{}) *Params {
 	return ret
 }
 
+// Add adds sql param to Params property.
 func (p *Params) Add(v interface{}) error {
 	switch x := v.(type) {
 	case string:
